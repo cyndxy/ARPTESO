@@ -27,8 +27,7 @@ w1_0 = R_psi(eta1_0(3)) * v1_0;
 w2_0 = R_psi(eta2_0(3)) * v2_0;
 w3_0 = R_psi(eta3_0(3)) * v3_0;
 w4_0 = R_psi(eta4_0(3)) * v4_0;
-Lambda0 = 8*ones(3,1);   % RPTESO自适应律初值，满足 Lambda(0) >= 1
-
+Lambda0 = 8*ones(3,1);   
 z0_1 = [eta1_0; w1_0; eta1_0; zeros(3,1); zeros(3,1); Lambda0];
 z0_2 = [eta2_0; w2_0; eta2_0; zeros(3,1); zeros(3,1); Lambda0];
 z0_3 = [eta3_0; w3_0; eta3_0; zeros(3,1); zeros(3,1); Lambda0];
@@ -469,7 +468,7 @@ function [dXdt, plot_data] = ode_function(t, X, M_followers, L1_inv_L2)
                     0, 0, 0];
         f_i = R_dot_i * v_i + R_i * (M_ship \ (-C_ship_v - D_ship_v + d_i));
 
-        % ====================== 【仅修改此处：改进性能函数】 ======================
+        % ============================================
         lambda_0   = [1.0; 1.0; 1.0];
         lambda_inf = [0.1; 0.1; 0.1];
 
@@ -507,7 +506,7 @@ function [dXdt, plot_data] = ode_function(t, X, M_followers, L1_inv_L2)
         B3_inv = diag(lambda_t ./ (lambda_t.^2 - e_i_safe.^2));
         B3 = diag((lambda_t.^2 - e_i_safe.^2) ./ lambda_t);
 
-        % ====================== PTSM 滑模面计算 ======================
+        % ====================== PTSM 滑模======================
         abs_eps = abs(eps_i);
         f_eps = zeros(3,1);
         dot_f_eps = zeros(3,1);
@@ -524,7 +523,7 @@ function [dXdt, plot_data] = ode_function(t, X, M_followers, L1_inv_L2)
         s_i = eps_dot_i + bar_alpha_s * f_eps + bar_beta_s * sig(eps_i, 1+alpha_s);
         % ============================================================
 
-        % ====================== 预定义时间趋近律 ======================
+        % ====================== 预定义时间 ======================
         delta_s = 0.01;
         abs_s = abs(s_i);
         sig_s1 = (abs_s < delta_s) .* (s_i ./ (delta_s.^(1-alpha_u))) + ...
@@ -540,7 +539,7 @@ function [dXdt, plot_data] = ode_function(t, X, M_followers, L1_inv_L2)
         tau_i = M_ship * R_i' * ( -B3 * ( term_slide + (B1_vec + B2_vec) + term_eps ) + e_ddot_ref - f_hat_i );
         % ====================================================
 
-        % ====================== RPTESO 观测器======================
+        % ====================== ARPTESO======================
         z_tilde_i1 = eta_i - eta_hat_i;
 
         g1_obs = 6; g2_obs = 8; g3_obs = 2;
